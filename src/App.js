@@ -1,61 +1,73 @@
-import React, { useState } from 'react'
-import Navbar from './components/Navbar'
-import Shop from './components/Shop'
-import './App.css';
-import Cart from './components/Cart';
+import React, { useState } from 'react';
+import Navbar from './components/Navbar';
+import Shop from './components/Shop';
+import './App.css'; 
+import Cart from './components/Cart'; 
 
 const App = () => {
+  // State to manage items in the cart
+  const [cart, setCart] = useState([]);
 
-  const [cart,setCart] = useState([]);
-  const [warning,setWarning] = useState(false);
-  const[show,setShow] = useState(true);
+  // State to show a warning when an item is already in the cart
+  const [warning, setWarning] = useState(false);
 
-  const handleClick=(item) =>{
+  // State to toggle between Shop and Cart views
+  const [show, setShow] = useState(true);
+
+  // Function to handle adding an item to the cart
+  const handleClick = (item) => {
     let isPresent = false;
-    cart.forEach((product) =>{
-      if(item.id === product.id)
-      isPresent= true;
-    })
+    
+    // Check if the item is already in the cart
+    cart.forEach((product) => {
+      if (item.id === product.id) isPresent = true;
+    });
 
-    if(isPresent){
+    if (isPresent) {
+      // Show warning if the item is already in the cart
       setWarning(true);
-      setTimeout(()=>{
+      setTimeout(() => {
         setWarning(false);
-      },2000);
+      }, 2000); // Hide the warning after 2 seconds
       return;
     }
-    setCart([...cart,item]);
-  }
 
-  const handleChange = (item,d) => {
+    // Add the item to the cart
+    setCart([...cart, { ...item, amount: 1 }]); // Adding initial quantity
+  };
+
+  // Function to handle quantity changes of items in the cart
+  const handleChange = (item, d) => {
     let ind = -1;
-    cart.forEach((data,index) => {
-      if(data.id === item.id)
-      ind = index;
-    });
-    const tempArr = cart;
-    tempArr[ind].amount +=d;
-    console.log(tempArr);
 
-    if(tempArr[ind].amount === 0){
-      tempArr[ind].amount =1;
-      
+    // Find the index of the item in the cart
+    cart.forEach((data, index) => {
+      if (data.id === item.id) ind = index;
+    });
+
+    const tempArr = [...cart]; // Creating a copy of the cart array
+    tempArr[ind].amount += d; // Updating the quantity
+
+    // Ensure quantity does not go below 1
+    if (tempArr[ind].amount === 0) {
+      tempArr[ind].amount = 1;
     }
-    setCart([...tempArr])
-  }
+
+    // Update the cart state
+    setCart(tempArr);
+  };
 
   return (
     <div>
-      <Navbar size={cart.length} setShow={setShow}/>
-      {
-        show ? <Shop handleClick={handleClick} /> : <Cart cart={cart} setCart={setCart} handleChange={handleChange}/>
-      }
-      
-      {
-        warning && <div className='warning'> Item is already in your cart </div>
-      }
-    </div>
-  )
-}
+      <Navbar size={cart.length} setShow={setShow} />
 
-export default App
+      {/* Conditionally rendering Shop or Cart based on 'show' state */}
+      {show ? <Shop handleClick={handleClick} /> : <Cart cart={cart} setCart={setCart} handleChange={handleChange} />}
+
+      {/* Display warning message if an item is already in the cart */}
+      {warning && <div className='warning'> Item is already in your cart </div>}
+    </div>
+  );
+};
+
+export default App;
